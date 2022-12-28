@@ -5,6 +5,7 @@ import cinema.dao.RoleDao;
 import cinema.exception.DataProcessingException;
 import cinema.model.Role;
 import cinema.model.Role.RoleName;
+import java.util.Optional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -17,12 +18,11 @@ public class RoleDaoImpl extends AbstractDao<Role> implements RoleDao {
     }
 
     @Override
-    public Role getByName(RoleName roleName) {
+    public Optional<Role> getByName(RoleName roleName) {
         try (Session session = factory.openSession()) {
-            Query<Role> findByEmail = session.createQuery(
-                    "FROM Role WHERE name = :name", Role.class);
-            findByEmail.setParameter("name", roleName.name());
-            return findByEmail.uniqueResult();
+            return session.createQuery("FROM Role WHERE name = :name", Role.class)
+                    .setParameter("name", roleName.name())
+                    .uniqueResultOptional();
         } catch (Exception e) {
             throw new DataProcessingException("Can't get role:" + roleName, e);
         }
